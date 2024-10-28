@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cricket Toss</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background-image: url('1.jpg'); /* Add your background image here */
+            background-size: cover;
+            background-position: center;
+            color: #fff;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: #ffdd57;
+            margin-bottom: 30px;
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.8);
+            text-align: center;
+        }
+
+        #inputContainer {
+            margin-bottom: 20px; 
+        }
+
+        #cardContainer {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px; 
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .card {
+            width: 150px;
+            height: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(255, 255, 255, 0.8);
+            border: 2px solid #ffdd57;
+            border-radius: 10px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            cursor: pointer;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+            transition: transform 0.3s, background-color 0.3s;
+            text-transform: uppercase;
+        }
+
+        .card.closed {
+            background-color: rgba(255, 255, 255, 0.6);
+            color: #6c757d;
+        }
+
+        .card.open {
+            background-color: #d4edda;
+            color: #333;
+            transform: scale(1.05);
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 1rem;
+            background-color: #28a745; /* Green for Submit */
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.3s, transform 0.3s;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+            font-weight: bold;
+        }
+
+        button:hover {
+            background-color: #218838;
+            transform: scale(1.05);
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        #resultMessage {
+            font-size: 1.5rem;
+            margin-top: 15px;
+            font-weight: bold;
+            text-align: center;
+            opacity: 0; /* Initially hidden */
+            transition: opacity 0.5s, transform 0.5s; /* Animation properties */
+        }
+
+        #won {
+            color: limegreen;
+            transform: scale(1.2); /* Slight zoom effect */
+        }
+
+        #lost {
+            color: red;
+            transform: scale(1.2); /* Slight zoom effect */
+        }
+
+        input {
+            padding: 10px;
+            margin-right: 10px;
+            font-size: 1.2rem;
+            border: 2px solid #ffdd57;
+            border-radius: 5px;
+            width: 70px;
+            text-align: center;
+            text-transform: uppercase;
+            outline: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            border-color: #ffc107;
+        }
+
+        /* Responsive styling */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .card {
+                width: 120px;
+                height: 160px;
+                font-size: 1.2rem;
+            }
+
+            button {
+                font-size: 0.9rem;
+                padding: 12px 24px;
+            }
+
+            input {
+                width: 60px;
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .card {
+                width: 100px;
+                height: 140px;
+                font-size: 1rem;
+            }
+
+            button {
+                font-size: 0.8rem;
+                padding: 10px 20px;
+            }
+
+            input {
+                width: 50px;
+                font-size: 0.9rem;
+            }
+
+            #resultMessage {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<h1>Cricket Toss</h1>
+
+<div id="inputContainer">
+    <input type="text" id="userInput" maxlength="1" placeholder="H or T">
+    <button id="submitButton">Submit</button>
+</div>
+
+<div id="cardContainer"></div>
+
+<button id="regenerateButton">Regenerate</button>
+
+<div id="resultMessage"></div>
+
+<script>
+    const cardContainer = document.getElementById('cardContainer');
+    const regenerateButton = document.getElementById('regenerateButton');
+    const submitButton = document.getElementById('submitButton');
+    const userInput = document.getElementById('userInput');
+    const resultMessage = document.getElementById('resultMessage');
+    const cards = [];
+
+    function createCard() {
+        const card = document.createElement('div');
+        card.className = 'card closed'; // Initially closed
+        card.textContent = 'Closed';
+
+        cards.push(card);
+        cardContainer.appendChild(card);
+    }
+
+    function regenerateCards() {
+        cards.forEach(card => {
+            card.textContent = 'Closed'; // Reset the card text
+            card.dataset.result = ''; // Clear the stored result
+            card.classList.remove('open'); // Reset open status
+            card.classList.add('closed'); // Set it to closed
+        });
+
+        userInput.value = ''; // Clear the input field
+        resultMessage.textContent = ''; // Clear the result message
+        resultMessage.style.opacity = 0; // Reset opacity
+    }
+
+    function handleToss() {
+        const userChoice = userInput.value.toUpperCase();
+
+        if (userChoice !== 'H' && userChoice !== 'T') {
+            resultMessage.textContent = 'Please enter either H for Heads or T for Tails!';
+            resultMessage.style.color = 'red';
+            resultMessage.style.opacity = 1;
+            return;
+        }
+
+        const randomCardIndex = Math.floor(Math.random() * cards.length);
+        const randomResult = Math.random() < 0.5 ? 'H' : 'T';
+
+        // Close both cards
+        cards.forEach(card => {
+            card.textContent = 'Close';
+            card.classList.remove('open');
+            card.classList.add('close');
+        });
+
+        // Open one card with result
+        cards[randomCardIndex].textContent = randomResult === 'H' ? 'Heads' : 'Tails';
+        cards[randomCardIndex].dataset.result = randomResult;
+        cards[randomCardIndex].classList.remove('closed');
+        cards[randomCardIndex].classList.add('open');
+
+        // Compare result with user input
+        if (randomResult === userChoice) {
+            resultMessage.textContent = 'You Won the Toss!!';
+            resultMessage.style.color = 'limegreen';
+            resultMessage.style.opacity = 1; // Fade in
+        } else {
+            resultMessage.textContent = 'You Lost the Toss!!';
+            resultMessage.style.color = 'red';
+            resultMessage.style.opacity = 1; // Fade in
+        }
+
+        // Animate the result message
+        resultMessage.style.transform = 'scale(1.1)'; // Slight zoom effect
+        setTimeout(() => {
+            resultMessage.style.transform = 'scale(1)'; // Reset scale
+        }, 500);
+    }
+
+    // Create initial cards
+    for (let i = 0; i < 2; i++) {
+        createCard();
+    }
+
+    regenerateButton.addEventListener('click', regenerateCards);
+    submitButton.addEventListener('click', handleToss);
+
+    // Initially, regenerate to reset everything
+    regenerateCards();
+</script>
+
+</body>
+</html>
